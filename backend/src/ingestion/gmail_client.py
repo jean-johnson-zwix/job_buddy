@@ -22,7 +22,7 @@ class GmailClient:
         clean = re.sub(r'\s+', ' ', clean).strip()
         return clean
         
-    def fetch_job_alerts(self, max_results=10):
+    def fetch_job_alerts(self, max_results=2):
         query = "job alert"
         results = self.service.users().messages().list(userId='me', q=query, maxResults=max_results).execute()
         messages = results.get('messages', [])
@@ -30,6 +30,8 @@ class GmailClient:
         for msg in messages:
             # retreive email body content
             m = self.service.users().messages().get(userId='me', id=msg['id'], format='full').execute()
+            message_id = m['id']
+            gmail_link = f"https://mail.google.com/mail/u/0/#inbox/{message_id}"
             # extract text body
             body = ""
             if 'parts' in m['payload']:
@@ -42,6 +44,7 @@ class GmailClient:
                 body = base64.urlsafe_b64decode(data).decode('utf-8')
             full_emails.append({
                 "id": m['id'],
-                "content": body if body else m['snippet']
+                "content": body if body else m['snippet'],
+                "link": gmail_link
             })
         return full_emails

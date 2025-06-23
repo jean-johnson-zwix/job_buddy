@@ -1,0 +1,41 @@
+from src.ingestion.gmail_client import GmailClient
+from src.ingestion.gdrive_client import DriveResumeLoader
+from src.agent.job_engine import JobEngine
+from src.database.db_manager import DBManager
+from dotenv import load_dotenv
+load_dotenv()
+import time
+
+def run():
+    print("Job Buddy is starting...")
+    
+    # get the resume from drive
+    resume_text = DriveResumeLoader().get_resume_text()
+    
+    # get the job emails
+    gmail_client = GmailClient()
+    emails = gmail_client.fetch_job_alerts()
+    email_link_map = {e['id']: e['link'] for e in emails}
+    print(f"Retrieved {len(emails)} job emails")
+
+    # llm extracts the relevant details
+    extractor = JobEngine()
+    jobs = extractor.extract_jobs(emails, resume_text)
+    print(f"LLM extracted {len(jobs)} job opportunities.")
+
+    # store jobs in database
+    db = DBManager()
+    new_count = 0
+    for job in jobs:
+        job['gmail_url'] = email_link_map.get(job['gmail_id'])
+        if db.insert_job(job):
+            new_count += 1
+            
+    print(f"Phase 2: Intelligent Scoring: {new_count} new jobs added")
+    
+if __name__ == "__main__":
+    start_time = time.perf_counter()
+    run()
+    end_time = time.perf_counter()
+    execution_time = end_time - start_time
+    print(f"Execution time: {execution_time:.4f} seconds")

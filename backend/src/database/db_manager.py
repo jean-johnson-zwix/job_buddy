@@ -27,8 +27,11 @@ class DBManager:
             title VARCHAR(255),
             company VARCHAR(255),
             location VARCHAR(255),
-            link TEXT,
+            score INTEGER,
+            match_reason TEXT,
             status VARCHAR(50) DEFAULT 'New',
+            gmail_url TEXT,
+            link TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """
@@ -39,10 +42,12 @@ class DBManager:
 
     def insert_job(self, job_data):
         query = """
-        INSERT INTO jobs (gmail_id, title, company, location, link)
-        VALUES (%s, %s, %s, %s, %s)
-        ON CONFLICT (gmail_id) DO NOTHING
-        RETURNING id;
+        INSERT INTO jobs (gmail_id, title, company, location, gmail_url, link, score, match_reason)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (gmail_id) DO UPDATE SET
+            gmail_url = EXCLUDED.gmail_url,
+            score = EXCLUDED.score,
+            match_reason = EXCLUDED.match_reason;
         """
         try:
             with self._get_connection() as conn:
@@ -52,15 +57,13 @@ class DBManager:
                         job_data.get('title'),
                         job_data.get('company'),
                         job_data.get('location'),
-                        job_data.get('link')
+                        job_data.get('gmail_url'),
+                        job_data.get('link'),
+                        job_data.get('score'),
+                        job_data.get('match_reason')
                     ))
-                    result = cur.fetchone()
                     conn.commit()
-                    
-                    if result:
-                        return "INSERTED"
-                    else:
-                        return "SKIPPED"
+                    return True
         except Exception as e:
             print(f"DBManager Error: {e}")
-            return "ERROR"
+            return False

@@ -2,7 +2,7 @@ import google.generativeai as genai
 import json
 import os
 
-class JobExtractor:
+class JobEngine:
     def __init__(self):
         api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
         genai.configure(api_key=api_key)
@@ -10,7 +10,7 @@ class JobExtractor:
         self.MAX_CHARS_PER_EMAIL = 3000  # Trim HTML
         self.MAX_TOTAL_CHARS = 100000    # Token Limit
 
-    def extract_details(self, emails):
+    def extract_jobs(self, emails, resume_text):
         processed_contents = []
         for e in emails:
             # retrieve email content
@@ -26,15 +26,38 @@ class JobExtractor:
             full_context = full_context[:self.MAX_TOTAL_CHARS]
 
         prompt = f"""
-        Extract job details from these emails. Return ONLY a JSON array.
-        If an email has multiple jobs, extract each one.
-        Format: [{{"title": "...", "company": "...", "location": "...", "link": "...", "gmail_id": "..."}}]
+        You are an Expert Career Coach. I will provide my resume and several job alert emails.
+
+        Task 1:
+        - Extract job details from these emails. Return ONLY a JSON array.
+        - If an email has multiple jobs, extract each one.
 
         DATA:
         {full_context}
+
+        Task 2:
+        - Rate each job (1-10) based on my resume
+        - Provide a brief reason for the score.
+
+        RESUME:
+        {resume_text}
+
+        OUTPUT FORMAT (Strict JSON array):
+        [
+          {{
+            "gmail_id": "...",
+            "title": "...",
+            "company": "...",
+            "location": "...",
+            "link": "...",
+            "score": 9,
+            "match_reason": "Matches your experience with AWS cloud-native designs at Cognizant."
+          }}
+        ]
         """
 
         try:
+            print(f'Asking Gemini...')
             response = self.model.generate_content(prompt)
             # Handle potential markdown wrappers in response
             text = response.text.strip().removeprefix("```json").removesuffix("```").strip()
