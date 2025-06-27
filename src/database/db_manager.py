@@ -67,3 +67,23 @@ class DBManager:
         except Exception as e:
             print(f"DBManager Error: {e}")
             return False
+
+    def get_all_scored_jobs(self):
+        query = """
+        SELECT title, company, location, score, match_reason, gmail_url, link, gmail_id
+        FROM jobs 
+        WHERE score IS NOT NULL 
+        ORDER BY score DESC, id DESC;
+        """
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query)
+                    columns = [desc[0] for desc in cur.description]
+                    results = []
+                    for row in cur.fetchall():
+                        results.append(dict(zip(columns, row)))
+                    return results
+        except Exception as e:
+            print(f"DBManager Error: {e}")
+            return []
