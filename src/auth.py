@@ -6,7 +6,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 # 1. Define the combined scopes
 SCOPES = [
     'https://www.googleapis.com/auth/gmail.readonly',
-    'https://www.googleapis.com/auth/drive.readonly'
+    'https://www.googleapis.com/auth/drive.readonly',
+    'https://www.googleapis.com/auth/gmail.modify'
 ]
 
 def authenticate():

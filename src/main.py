@@ -30,6 +30,7 @@ def run():
         job['gmail_url'] = email_link_map.get(job['gmail_id'])
         if db.insert_job(job):
             new_count += 1
+        gmail_client.label_and_archive(job['gmail_id'], job['score'])
             
     print(f"Phase 2: Intelligent Scoring: {new_count} new jobs added")
     

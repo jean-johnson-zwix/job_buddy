@@ -32,6 +32,8 @@ def run_job_buddy():
         job['gmail_url'] = email_link_map.get(job['gmail_id'])
         if db.insert_job(job):
             new_count += 1
+        # label and archive emails
+        gmail_client.label_and_archive(job['gmail_id'], job['score'])
 
 st.set_page_config(page_title="Job Buddy", layout="wide")
 st.sidebar.header("Control Panel")

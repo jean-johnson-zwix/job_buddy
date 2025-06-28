@@ -23,7 +23,7 @@ class GmailClient:
         return clean
         
     def fetch_job_alerts(self, max_results=2):
-        query = "job alert"
+        query = 'label:INBOX "job alert" -label:JobBuddy/High-Match -label:JobBuddy/Processed'
         results = self.service.users().messages().list(userId='me', q=query, maxResults=max_results).execute()
         messages = results.get('messages', [])
         full_emails = []
@@ -48,3 +48,28 @@ class GmailClient:
                 "link": gmail_link
             })
         return full_emails
+
+    def label_and_archive(self, message_id, score):
+        label_name = "JobBuddy/High-Match" if score >= 7 else "JobBuddy/Processed"
+        try:
+            results = self.service.users().labels().list(userId='me').execute()
+            labels = results.get('labels', [])
+            label_id = next((l['id'] for l in labels if l['name'] == label_name), None)
+            if not label_id:
+                label_body = {
+                    'name': label_name,
+                    'labelListVisibility': 'labelShow',
+                    'messageListVisibility': 'show'
+                }
+                label_id = self.service.users().labels().create(userId='me', body=label_body).execute()['id']
+            self.service.users().messages().batchModify(
+                userId='me',
+                body={
+                    'ids': [message_id],
+                    'addLabelIds': [label_id],
+                    'removeLabelIds': ['INBOX']
+                }
+            ).execute()
+            print(f"Archived and labeled {message_id} as {label_name}")
+        except Exception as e:
+            print(f"Labeling error: {e}")
