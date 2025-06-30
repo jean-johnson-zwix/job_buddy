@@ -1,6 +1,6 @@
 from src.ingestion.gmail_client import GmailClient
 from src.ingestion.gdrive_client import DriveResumeLoader
-from src.agent.job_engine import JobEngine
+from src.agent.extractor import JobScout
 from src.database.db_manager import DBManager
 from dotenv import load_dotenv
 load_dotenv()
@@ -19,7 +19,7 @@ def run():
     print(f"Retrieved {len(emails)} job emails")
 
     # llm extracts the relevant details
-    extractor = JobEngine()
+    extractor = JobScout()
     jobs = extractor.extract_jobs(emails, resume_text)
     print(f"LLM extracted {len(jobs)} job opportunities.")
 

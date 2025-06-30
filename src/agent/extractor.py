@@ -2,7 +2,7 @@ import google.generativeai as genai
 import json
 import os
 
-class JobEngine:
+class JobScout:
     def __init__(self):
         api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
         genai.configure(api_key=api_key)
