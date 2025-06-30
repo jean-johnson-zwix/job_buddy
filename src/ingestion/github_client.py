@@ -6,7 +6,7 @@ class GithubClient:
     def __init__(self):
         self.gh = Github(os.getenv("GITHUB_TOKEN"))
 
-    def load_readme(self, username):
+    def load_all_readme(self, username):
         documents = []
         user = self.gh.get_user(username)
         for repo in user.get_repos():

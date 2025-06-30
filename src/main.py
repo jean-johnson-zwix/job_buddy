@@ -3,6 +3,7 @@ from src.ingestion.github_client import GithubClient
 from src.ingestion.gdrive_client import DriveResumeLoader
 from src.agent.extractor import JobScout
 from src.datastore.database_manager import DBManager
+from src.datastore.vector_store_manager import VectorStoreManager
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -37,8 +38,8 @@ def run():
     print(f"Phase 2: Intelligent Scoring: {new_count} new jobs added")
 
 def test():
-    github_client = GithubClient()
-    github_client.load_readme(os.getenv("GITHUB_USERNAME"))
+    vector_store = VectorStoreManager()
+    vector_store.load_readme_into_vector_store(os.getenv("GITHUB_USERNAME"))
 
 if __name__ == "__main__":
     start_time = time.perf_counter()
