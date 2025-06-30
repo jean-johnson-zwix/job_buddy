@@ -28,7 +28,7 @@ class VectorStoreManager:
     def search_relevant_projects(self, job_description):
         """Finds project snippets most relevant to the JD."""
         if not self.vector_db:
-            self.vector_db = Chroma(persist_directory=self.persist_directory, embedding_embeddings=self.embeddings)
+            self.vector_db = Chroma(persist_directory=self.persist_directory, embedding_function=self.embeddings)
         
         results = self.vector_db.similarity_search(job_description, k=3)
         return "\n\n".join([res.page_content for res in results])
