@@ -1,7 +1,9 @@
 from src.ingestion.gmail_client import GmailClient
+from src.ingestion.github_client import GithubClient
 from src.ingestion.gdrive_client import DriveResumeLoader
 from src.agent.extractor import JobScout
-from src.database.db_manager import DBManager
+from src.datastore.database_manager import DBManager
+import os
 from dotenv import load_dotenv
 load_dotenv()
 import time
@@ -33,10 +35,14 @@ def run():
         gmail_client.label_and_archive(job['gmail_id'], job['score'])
             
     print(f"Phase 2: Intelligent Scoring: {new_count} new jobs added")
-    
+
+def test():
+    github_client = GithubClient()
+    github_client.load_readme(os.getenv("GITHUB_USERNAME"))
+
 if __name__ == "__main__":
     start_time = time.perf_counter()
-    run()
+    test()
     end_time = time.perf_counter()
     execution_time = end_time - start_time
     print(f"Execution time: {execution_time:.4f} seconds")

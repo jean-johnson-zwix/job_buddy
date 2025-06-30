@@ -1,6 +1,6 @@
 import os
 from github import Github
-from langchain.schema import Document
+from langchain_core.documents import Document
 
 class GithubClient:
     def __init__(self):
@@ -9,13 +9,11 @@ class GithubClient:
     def load_readme(self, username):
         documents = []
         user = self.gh.get_user(username)
-        
         for repo in user.get_repos():
             try:
                 # get README
                 readme = repo.get_readme()
                 content = readme.decoded_content.decode('utf-8')
-                
                 # Metadata: repo name + URL
                 doc = Document(
                     page_content=content,
@@ -29,5 +27,4 @@ class GithubClient:
                 print(f"Loaded README from: {repo.name}")
             except:
                 continue
-                
         return documents
