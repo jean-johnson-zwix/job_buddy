@@ -31,6 +31,10 @@ class JobScout:
         Task 1:
         - Extract job details from these emails. Return ONLY a JSON array.
         - If an email has multiple jobs, extract each one.
+        - THE LINK: Find the primary 'View Job' or 'Apply' URL. 
+           - Ignore 'Manage Alerts' or 'Unsubscribe' links.
+           - If it's a redirect link (like from LinkedIn/Indeed), provide that.
+           - If you cannot find a direct link to the job, set job_url to null. Do not hallucinate a link.
 
         DATA:
         {full_context}
