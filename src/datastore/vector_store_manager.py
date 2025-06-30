@@ -11,7 +11,7 @@ class VectorStoreManager:
         self.persist_directory = "buddy_chroma_db/project_readmes"
         self.vector_db = None
 
-    def load_readme_into_vector_store(self, username):
+    def load_readme_files(self, username):
         github_client = GithubClient()
         docs = github_client.load_all_readme(os.getenv("GITHUB_USERNAME"))
         

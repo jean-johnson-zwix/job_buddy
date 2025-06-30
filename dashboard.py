@@ -1,9 +1,11 @@
 import streamlit as st
-from src.database.db_manager import DBManager
 from src.ingestion.gmail_client import GmailClient
 from src.ingestion.gdrive_client import DriveResumeLoader
-from src.agent.job_engine import JobEngine
-from src.database.db_manager import DBManager
+from src.agent.extractor import JobScout
+from src.datastore.database_manager import DBManager
+from src.datastore.vector_store_manager import VectorStoreManager
+import os 
+
 from dotenv import load_dotenv
 load_dotenv()
 import time
@@ -21,7 +23,7 @@ def run_job_buddy():
     st.write(f"Retrieved {len(emails)} job emails")
 
     # llm extracts the relevant details
-    extractor = JobEngine()
+    extractor = JobScout()
     jobs = extractor.extract_jobs(emails, resume_text)
     st.write(f"LLM extracted {len(jobs)} job opportunities.")
 
@@ -34,7 +36,9 @@ def run_job_buddy():
             new_count += 1
         # label and archive emails
         gmail_client.label_and_archive(job['gmail_id'], job['score'])
+    st.write(f"Added new {new_count} jobs to the database")
 
+# ----- CONTROL PANEL ----------#
 st.set_page_config(page_title="Job Buddy", layout="wide")
 st.sidebar.header("Control Panel")
 if st.sidebar.button("Load more Jobs", use_container_width=True):
@@ -47,8 +51,13 @@ if st.sidebar.button("Load more Jobs", use_container_width=True):
         except Exception as e:
             status.update(label="Sync Failed", state="error")
             st.error(f"Error: {e}")
+if st.sidebar.button("Sync GitHub Projects", use_container_width=True):
+    with st.spinner("Loading projects from github..."):
+        vector_store = VectorStoreManager()
+        vector_store.load_readme_files(os.getenv("GITHUB_USERNAME"))
+        st.sidebar.success("GitHub Knowledge Base Updated!")
 
-
+# ----- DASHBOARD ----------#
 st.title("Job Buddy Dashboard")
 st.markdown("---")
 db = DBManager()

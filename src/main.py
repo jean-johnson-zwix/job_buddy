@@ -39,7 +39,7 @@ def run():
 
 def test():
     vector_store = VectorStoreManager()
-    vector_store.load_readme_into_vector_store(os.getenv("GITHUB_USERNAME"))
+    vector_store.load_readme_files(os.getenv("GITHUB_USERNAME"))
 
 if __name__ == "__main__":
     start_time = time.perf_counter()
