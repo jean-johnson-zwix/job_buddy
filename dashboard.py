@@ -2,6 +2,7 @@ import streamlit as st
 from src.ingestion.gmail_client import GmailClient
 from src.ingestion.gdrive_client import DriveResumeLoader
 from src.agent.extractor import JobScout
+from src.agent.optimizer import OptimizerBuddy
 from src.datastore.database_manager import DBManager
 from src.datastore.vector_store_manager import VectorStoreManager
 import os 
@@ -57,10 +58,12 @@ if st.sidebar.button("Sync GitHub Projects", use_container_width=True):
         vector_store.load_readme_files(os.getenv("GITHUB_USERNAME"))
         st.sidebar.success("GitHub Knowledge Base Updated!")
 
+db = DBManager()
+optimizer_buddy=OptimizerBuddy()
+
 # ----- DASHBOARD ----------#
 st.title("Job Buddy Dashboard")
 st.markdown("---")
-db = DBManager()
 jobs = db.get_all_scored_jobs()
 if not jobs:
     st.info("No jobs found in database")
@@ -75,29 +78,40 @@ else:
     min_score = st.sidebar.slider("Filter by Min Score", 1, 10, 6)
     for job in jobs:
         if job['score'] >= min_score:
-            # The expander header shows the most important info first
             with st.expander(f"⭐ **{job['score']}/10** | {job['title']} at {job['company']}"):
                 
-                # Metadata row
+                #------- Optimize Button------------#
+                if st.button(f"Optimize Resume for {job['company']}", key=f"opt_{job['gmail_id']}"):
+                    with st.spinner("Job Buddy is getting your resume ready for ATS..."):
+                        resume_text = DriveResumeLoader().get_resume_text()
+                        optimized_content = optimizer_buddy.optimize_resume(resume_text, job) 
+                        if optimized_content is None:
+                            st.error("Buddy couldn't find the job description 😥")
+                        st.subheader("Application Strategy")
+                        st.markdown(optimized_content)
+                        st.download_button(
+                            label="Download Content",
+                            data=optimized_content,
+                            file_name=f"Resume_{job['company']}.txt",
+                            mime="text/plain"
+                        )
+
+                #------Metadata-----#
                 st.write(f"**Location:** {job['location']}")
                 st.info(f"**Why it fits:** {job['match_reason']}")
                 job_id = job.get('gmail_id')
-                # Action Buttons Row
-                btn_col1, btn_col2 = st.columns(2)
-                
-                with btn_col1:
-                    # This opens the specific Gmail message we found
-                    # display logic inside your loop
-                    gmail_url = job.get('gmail_url')
 
+                #---- Action Buttons ---#
+                btn_col1, btn_col2 = st.columns(2)
+                with btn_col1:
+                    # opens the gmail
+                    gmail_url = job.get('gmail_url')
                     if gmail_url:
                         st.link_button("See in Gmail", gmail_url, use_container_width=True)
                     else:
-                        # This handles the case where the URL is None/Null
-                        st.button("See in Gmail", disabled=True, use_container_width=True, key=f"missing_{job_id}")
-                
+                        st.button("See in Gmail", disabled=True, use_container_width=True, key=f"missing_{job_id}")      
                 with btn_col2:
-                    # This opens the direct application link extracted by Gemini
+                    # apply button
                     if job['link'] and job['link'].startswith("http"):
                         st.link_button("Apply Now", job['link'], use_container_width=True, type="primary")
                     else:
