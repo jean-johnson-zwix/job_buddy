@@ -18,7 +18,7 @@ Finally, Buddy got his own team!. Buddy now goes through all the projects I have
 
 ### Architecture
 
-![alt text](phase4_architecture.png)
+![alt text](media/phase4_architecture.png)
 
 #### Features
 - GitHub Integration: Parses GitHub READMEs to build a local knowledge base of my technical expertise
