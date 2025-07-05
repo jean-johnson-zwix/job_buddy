@@ -3,11 +3,27 @@
 ### Technical Stack
 
 - Language: Python 3.11+
+- Orchestration: LangChain 0.3
+- Text Splitting: RecursiveCharacterTextSplitter
 - AI Model: Google Gemini 2.5 Flash
-- Database: PostgreSQL
+- Database: PostgreSQL, ChromaDB
 - APIs: Google Gmail API v1, Google Drive API v3
 - Frontend: Streamlit
+- AI agent Search Engine: Tavily AI
 - Libraries: ```google-api-python-client, psycopg2-binary, python-dotenv PyPDF2```
+
+## Phase 4:
+
+Finally, Buddy got his own team!. Buddy now goes through all the projects I have worked on (README files to be specific) using RAG and Tavily helps him do web searches and extraction. Now, I get valuable analysis on how much the job is a fit for me and also gives me resume optimization tips.
+
+### Architecture
+
+![alt text](phase4_architecture.png)
+
+#### Features
+- GitHub Integration: Parses GitHub READMEs to build a local knowledge base of my technical expertise
+- Vectorized Semantic Search: Uses ChromaDB and HuggingFace Embeddings to find most relevant project for the job description
+- Autonomous Web Search: Uses Tavily AI to search for job links and extracts job description from external career websites.
 
 ## Phase 3: 
 
@@ -67,5 +83,5 @@ pip install -r requirements.txt
 ```
 ### 3. Run the dashboard
 ```
-streamlit run app.py
+streamlit run dashboard.py
 ```
